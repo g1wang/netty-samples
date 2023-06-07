@@ -6,6 +6,7 @@
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/s1-bio/pom.xml" />
+        <option value="$PROJECT_DIR$/s2-netty-echo/pom.xml" />
       </list>
     </option>
   </component>
