@@ -8,6 +8,8 @@ public class S2NettyEchoApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(S2NettyEchoApplication.class, args);
+        int port = 5200;
+
     }
 
 }
