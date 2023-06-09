@@ -2,6 +2,7 @@ package com.example.s2nettyecho;
 
 import com.example.s2nettyecho.handler.EchoServerHandler;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -16,12 +17,12 @@ public class EchoServer {
         this.port = port;
     }
 
-    public void start() {
+    public void start() throws InterruptedException {
 
         final EchoServerHandler echoServerHandler = new EchoServerHandler();
         EventLoopGroup group = new NioEventLoopGroup();
-        ServerBootstrap bootstrap = new ServerBootstrap();
-        bootstrap.group(group)
+        ServerBootstrap b = new ServerBootstrap();
+        b.group(group)
                 .channel(NioServerSocketChannel.class)
                 .localAddress(this.port)
                 .childHandler(new ChannelInitializer<SocketChannel>() {
@@ -30,5 +31,11 @@ public class EchoServer {
                         ch.pipeline().addLast(echoServerHandler);
                     }
                 });
+        try {
+            ChannelFuture f = b.bind().sync();
+            f.channel().closeFuture().sync();
+        } finally {
+            group.shutdownGracefully().sync();
+        }
     }
 }
