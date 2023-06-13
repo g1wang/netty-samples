@@ -11,6 +11,11 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 public class EchoServer {
 
+    public static void main(String[] args) throws InterruptedException {
+        int port = 5200;
+        new EchoServer(port).start();
+    }
+
     int port;
 
     public EchoServer(int port) {
@@ -21,17 +26,18 @@ public class EchoServer {
 
         final EchoServerHandler echoServerHandler = new EchoServerHandler();
         EventLoopGroup group = new NioEventLoopGroup();
-        ServerBootstrap b = new ServerBootstrap();
-        b.group(group)
-                .channel(NioServerSocketChannel.class)
-                .localAddress(this.port)
-                .childHandler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel ch) throws Exception {
-                        ch.pipeline().addLast(echoServerHandler);
-                    }
-                });
         try {
+            ServerBootstrap b = new ServerBootstrap();
+            b.group(group)
+                    .channel(NioServerSocketChannel.class)
+                    .localAddress(this.port)
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel ch) throws Exception {
+                            ch.pipeline().addLast(echoServerHandler);
+                        }
+                    });
+
             ChannelFuture f = b.bind().sync();
             f.channel().closeFuture().sync();
         } finally {

@@ -8,8 +8,7 @@ public class S2NettyEchoApplication {
 
     public static void main(String[] args) throws InterruptedException {
         SpringApplication.run(S2NettyEchoApplication.class, args);
-        int port = 5200;
-        new EchoServer(port).start();
+
     }
 
 }
