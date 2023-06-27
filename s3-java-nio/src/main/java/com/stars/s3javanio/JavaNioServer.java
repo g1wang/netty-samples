@@ -44,6 +44,26 @@ public class JavaNioServer {
                         client.register(selector, SelectionKey.OP_WRITE | SelectionKey.OP_READ, msg.duplicate());
                         System.out.println("Accepted connection from " + client);
                     }
+                    if (key.isReadable()) {
+                        SocketChannel socketChannel = (SocketChannel) key.channel();
+                        System.out.println("SC 2:" + socketChannel);
+                        while (true) {
+                            ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+                            byteBuffer.clear();
+                            int r;
+                            r = socketChannel.read(byteBuffer);
+                            System.out.println("r:" + r);
+                            if (r < 0) {
+                                //客户端socket.close()会到这里，读取数r=-1
+                                key.cancel();
+                                System.out.println("cancel key for < 0");
+                            } else if (r == 0) {
+                                //客户端socket没有关闭，而channel没有数据，数据数r=0。
+                                //有时候select()返回了，但channel不一定有数据。可能select()是被其他方法唤醒
+                                break;
+                            }
+                        }
+                    }
                     if (key.isWritable()) {
                         SocketChannel client = (SocketChannel) key.channel();
                         ByteBuffer buffer = (ByteBuffer) key.attachment();
@@ -62,10 +82,8 @@ public class JavaNioServer {
                         key.channel().close();
                     } catch (IOException ex) {
                     }
-
                 }
             }
-
         }
     }
 }

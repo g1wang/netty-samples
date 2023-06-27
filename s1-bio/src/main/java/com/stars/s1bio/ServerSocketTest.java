@@ -9,8 +9,6 @@ public class ServerSocketTest {
     public static void main(String[] args) throws IOException {
         //创建一个新的 ServerSocket，用以 监听指定端口上的连接请求
         final ServerSocket serverSocket = new ServerSocket(5001);
-        ;
-
         try {
             for (; ; ) {
 
