@@ -31,7 +31,6 @@ public class NettyOIOServer {
                                         public void channelActive(ChannelHandlerContext ctx) throws Exception {
                                             ctx.writeAndFlush(buffer.duplicate())
                                                     .addListener(ChannelFutureListener.CLOSE);
-
                                         }
                                     }
                             );
