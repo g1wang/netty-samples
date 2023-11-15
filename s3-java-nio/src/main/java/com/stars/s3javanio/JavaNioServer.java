@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 public class JavaNioServer {
-    public void server(int port) throws IOException {
+    public void start(int port) throws IOException {
         ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
         serverSocketChannel.configureBlocking(false);
         ServerSocket serverSocket = serverSocketChannel.socket();
@@ -20,7 +20,7 @@ public class JavaNioServer {
         serverSocket.bind(address);
         Selector selector = Selector.open();
         //将serverSocket注册到Selector以接收连接
-        serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+        SelectionKey selectionKey = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
         final ByteBuffer msg = ByteBuffer.wrap("Hi!\r\n".getBytes());
         for (; ; ) {
 
@@ -35,7 +35,6 @@ public class JavaNioServer {
             Iterator<SelectionKey> iterator = readyKeys.iterator();
             while (iterator.hasNext()) {
                 SelectionKey key = iterator.next();
-                iterator.remove();
                 try {
                     if (key.isAcceptable()) {
                         ServerSocketChannel ssChannel = (ServerSocketChannel) key.channel();
@@ -47,22 +46,15 @@ public class JavaNioServer {
                     if (key.isReadable()) {
                         SocketChannel socketChannel = (SocketChannel) key.channel();
                         System.out.println("SC 2:" + socketChannel);
-                        while (true) {
-                            ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
-                            byteBuffer.clear();
-                            int r;
-                            r = socketChannel.read(byteBuffer);
-                            System.out.println("r:" + r);
-                            if (r < 0) {
-                                //客户端socket.close()会到这里，读取数r=-1
-                                key.cancel();
-                                System.out.println("cancel key for < 0");
-                            } else if (r == 0) {
-                                //客户端socket没有关闭，而channel没有数据，数据数r=0。
-                                //有时候select()返回了，但channel不一定有数据。可能select()是被其他方法唤醒
-                                break;
-                            }
+                        ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+                        if (socketChannel.read(byteBuffer) != -1) {
+                            String content = new String(byteBuffer.array()).trim();
+                            System.out.println("收到的客户端数据：" + content);
                         }
+                        byteBuffer.clear();
+                        //回复数据
+                        String reply = "thanks";
+                        socketChannel.write(ByteBuffer.wrap(reply.getBytes()));
                     }
                     if (key.isWritable()) {
                         SocketChannel client = (SocketChannel) key.channel();
@@ -76,13 +68,14 @@ public class JavaNioServer {
                     }
 
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    System.out.println();
                     key.cancel();
                     try {
                         key.channel().close();
                     } catch (IOException ex) {
                     }
                 }
+                iterator.remove();
             }
         }
     }
