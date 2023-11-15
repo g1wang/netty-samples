@@ -64,11 +64,9 @@ public class JavaNioServer {
                                 break;
                             }
                         }
-                        client.close();
                     }
 
                 } catch (IOException e) {
-                    System.out.println();
                     key.cancel();
                     try {
                         key.channel().close();
